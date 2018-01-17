@@ -28,19 +28,19 @@ try {
             _.keys(input[section]).forEach((subSection) => {
                 // depending on the subSection evaluate in a different way
                 switch(subSection){
-                    case "assigned_tasks":
+                    /*case "assigned_tasks":
                         assigned_tasks( _.values(input[section][subSection]) );
                         break;
-                    /*case "average_time_comment":
+                    case "average_time_comment":
                         average_time_comment( _.values(input[section][subSection]) );
                         break;
                     case "commit_distance":
                         commit_distance( _.values(input[section][subSection]) );
-                        break;
+                        break;*/
                     case "commit_length":
                         commit_length( _.values(input[section][subSection]) );
                         break;
-                    case "commit_size":
+                    /*case "commit_size":
                         commit_size( _.values(input[section][subSection]) );
                         break;
                     case "communication_miscalculation_effort":
@@ -64,36 +64,20 @@ try {
                 }
             });
 		}
-		values[section] = _.values(input[section]);
-		if (values[section].length) {
-			headings[section] = _.keys(values[section][0]);
-		}
-		
-		// Prepare CSV content
-		let content = headings[section].join(',');
-		values[section].forEach((row) => {
-			content += '\n';
-			headings[section].forEach((heading, index) => {
-				content += row[heading];
-				if (index + 1 < headings[section].length) {
-					content += ',';
-				}
-			});
-		});
-		
-		// Store to file
-		//fs.writeFileSync(`data-${section}.csv`, content);
-		// console.log(`[SUCCESS]: Created data-${section}.csv`);
 	});
 } catch (e) {
 	console.error(`[ERROR]: ${e.message}`);
 	process.exit(1);
 }
 
+/**
+ * Calculates the assigned_tasks per user and timeMS and creates a csv called assigned_tasks_history.csv
+ * @param data jsonData for metric_history assigned_tasks
+ * */
 function assigned_tasks(data){
-    let content = "id,displayName,email,name,numIssues\n";
+    let content = "timeMS,displayName,email,name,numIssues\n";
     data.forEach((row) => {
-        var timeMS = row["timestamp"]["time"]
+        var timeMS = row["timestamp"]["time"];
         if(row["metric"]){
             var users = row["metric"]["users"];
             users.forEach((user) => {
@@ -105,20 +89,67 @@ function assigned_tasks(data){
             });
         }
     });
-    console.log(content);
     fs.writeFileSync(`assigned_tasks_history.csv`, content);
 }
 
+/**
+ * Calculates the average_time_comment per timeMS and creates a csv called average_time_comment_history.csv
+ * @param data jsonData for metric_history average_time_comment
+ * */
 function average_time_comment(data){
-    console.log("avg_time");
+    let content = "timeMS,averageResponseTime,numberOfAnsweredQuestions,numberOfNotAnsweredQuestions,numberOfQuestions\n";
+    data.forEach((row) => {
+        var timeMS = row["timestamp"]["time"];
+        var averageResponseTime = row["metric"]["averageResponseTime"] ? row["metric"]["averageResponseTime"] : 0;
+        var numberOfAnsweredQuestions = row["metric"]["numberOfAnsweredQuestions"] ? row["metric"]["numberOfAnsweredQuestions"] : 0;
+        var numberOfNotAnsweredQuestions = row["metric"]["numberOfNotAnsweredQuestions"] ?  row["metric"]["numberOfNotAnsweredQuestions"] : 0;
+        var numberOfQuestions = row["metric"]["numberOfQuestions"]? row["metric"]["numberOfQuestions"] : 0;
+        content += timeMS + "," + averageResponseTime + "," + numberOfAnsweredQuestions + "," + numberOfNotAnsweredQuestions + "," + numberOfQuestions + '\n';
+    });
+    fs.writeFileSync(`average_time_comment_history.csv`, content);
 }
 
+/**
+ * Calculates the commit_distance per timeMs and user and creates a csv called commit_distance_history.csv
+ * @param data jsonData for metric_history commit_distance
+ * */
 function commit_distance(data){
-    console.log("com_distance");
+    let content = "timeMS,averageMinuteDistance,commitCount,displayName,email\n";
+    data.forEach((row) => {
+        var timeMS = row["timestamp"]["time"];
+        if(row["metric"]){
+            var users = row["metric"]["users"];
+            users.forEach((user) => {
+                var averageMinuteDistance = user["averageMinuteDistance"] ? user["averageMinuteDistance"] : 0;
+                var commitCount = user["commitCount"] ? user["commitCount"]: 0;
+                var displayName = user["displayName"] ? user["displayName"]: 0;
+                var email = user["email"] ? user["email"]: 0;
+                content += timeMS + "," + averageMinuteDistance + "," + commitCount + "," + displayName + "," + email + '\n';
+            });
+        }
+    });
+    fs.writeFileSync(`commit_distance_history.csv`, content);
 }
 
+/**
+ * Calculates the commit_length per timeMs and User and creates a csv called commit_length_history.csv
+ * @param data jsonData for metric_history commit_length
+ * */
 function commit_length(data){
-    console.log("comm_length");
+    let content = "timeMS,avgCommitLength,displayName,email\n";
+    data.forEach((row) => {
+        var timeMS = row["timestamp"]["time"];
+        if(row["metric"]){
+            var users = row["metric"]["users"];
+            users.forEach((user) => {
+                var avgCommitLength = user["avgCommitLength"] ? user["avgCommitLength"]:0;
+                var displayName = user["displayName"] ? user["displayName"]:0;
+                var email = user["email"] ? user["email"]: 0;
+                content += timeMS + "," + avgCommitLength + "," + displayName + "," + email +'\n';
+            });
+        }
+    });
+    fs.writeFileSync(`commit_length_history.csv`, content);
 }
 
 function commit_size(data){
