@@ -5,7 +5,7 @@ const _ = require('lodash');
 
 // Need to specify location of JSON file
 if (process.argv[2] === undefined) {
-	console.error('[INFO]: Usage - ftc <input>');
+	console.error('[INFO]: Usage - aumeConverter <input>');
 	process.exit(1);
 }
 
@@ -18,8 +18,6 @@ try {
 	process.exit(1);
 }
 
-let values = {};
-let headings = {};
 try {
 	_.keys(input).forEach((section) => {
 	    // Check if we are in the object metric_history
@@ -28,7 +26,7 @@ try {
             _.keys(input[section]).forEach((subSection) => {
                 // depending on the subSection evaluate in a different way
                 switch(subSection){
-                    /*case "assigned_tasks":
+                    case "assigned_tasks":
                         assigned_tasks( _.values(input[section][subSection]) );
                         break;
                     case "average_time_comment":
@@ -36,11 +34,11 @@ try {
                         break;
                     case "commit_distance":
                         commit_distance( _.values(input[section][subSection]) );
-                        break;*/
+                        break;
                     case "commit_length":
                         commit_length( _.values(input[section][subSection]) );
                         break;
-                    /*case "commit_size":
+                    case "commit_size":
                         commit_size( _.values(input[section][subSection]) );
                         break;
                     case "communication_miscalculation_effort":
@@ -60,14 +58,39 @@ try {
                         break;
                     case "time_since_last_commit":
                         time_since_last_commit( _.values(input[section][subSection]) );
-                        break;*/
+                        break;
                 }
             });
-		}
+		} else if(section === "mood_history"){
+            _.keys(input[section]).forEach(() => {
+                moods_calc(_.values(input[section]));
+            });
+
+        }
 	});
 } catch (e) {
 	console.error(`[ERROR]: ${e.message}`);
 	process.exit(1);
+}
+
+/**
+ * Calculates the Moodhistory by timeMS
+ * @param data jsonData for metric_history mood_history
+ * */
+function moods_calc(data){
+    let content= "timeMS,mood,userId,value,timeSubmitted \n";
+    data.forEach((row) => {
+        let timeMS = row["timestamp"]["time"];
+        let singleValues = row["teamMood"]["singleValues"];
+        singleValues.forEach((singleValues_row) => {
+            let mood= singleValues_row["mood"] ? singleValues_row["mood"] : "";
+            let userId = singleValues_row["userId"] ? singleValues_row["userId"] : "";
+            let value = singleValues_row["value"] ? singleValues_row["value"] : "";
+            let timeSubmitted = singleValues_row["timestamp"]["time"] ? singleValues_row["timestamp"]["time"] : 0;
+            content += timeMS + "," + mood + "," + userId + "," + value + "," + timeSubmitted + '\n';
+        });
+    });
+    fs.writeFileSync(`moods_history.csv`, content);
 }
 
 /**
@@ -77,11 +100,11 @@ try {
 function assigned_tasks(data){
     let content = "timeMS,displayName,email,name,numIssues\n";
     data.forEach((row) => {
-        var timeMS = row["timestamp"]["time"];
+        let timeMS = row["timestamp"]["time"];
         if(row["metric"]){
-            var users = row["metric"]["users"];
+            let users = row["metric"]["users"];
             users.forEach((user) => {
-                var issuesNum = 0;
+                let issuesNum = 0;
                 if(user["issues"]) {
                     issuesNum = user["issues"].length;
                 }
@@ -99,11 +122,11 @@ function assigned_tasks(data){
 function average_time_comment(data){
     let content = "timeMS,averageResponseTime,numberOfAnsweredQuestions,numberOfNotAnsweredQuestions,numberOfQuestions\n";
     data.forEach((row) => {
-        var timeMS = row["timestamp"]["time"];
-        var averageResponseTime = row["metric"]["averageResponseTime"] ? row["metric"]["averageResponseTime"] : 0;
-        var numberOfAnsweredQuestions = row["metric"]["numberOfAnsweredQuestions"] ? row["metric"]["numberOfAnsweredQuestions"] : 0;
-        var numberOfNotAnsweredQuestions = row["metric"]["numberOfNotAnsweredQuestions"] ?  row["metric"]["numberOfNotAnsweredQuestions"] : 0;
-        var numberOfQuestions = row["metric"]["numberOfQuestions"]? row["metric"]["numberOfQuestions"] : 0;
+        let timeMS = row["timestamp"]["time"];
+        let averageResponseTime = row["metric"]["averageResponseTime"] ? row["metric"]["averageResponseTime"] : 0;
+        let numberOfAnsweredQuestions = row["metric"]["numberOfAnsweredQuestions"] ? row["metric"]["numberOfAnsweredQuestions"] : 0;
+        let numberOfNotAnsweredQuestions = row["metric"]["numberOfNotAnsweredQuestions"] ?  row["metric"]["numberOfNotAnsweredQuestions"] : 0;
+        let numberOfQuestions = row["metric"]["numberOfQuestions"]? row["metric"]["numberOfQuestions"] : 0;
         content += timeMS + "," + averageResponseTime + "," + numberOfAnsweredQuestions + "," + numberOfNotAnsweredQuestions + "," + numberOfQuestions + '\n';
     });
     fs.writeFileSync(`average_time_comment_history.csv`, content);
@@ -116,14 +139,14 @@ function average_time_comment(data){
 function commit_distance(data){
     let content = "timeMS,averageMinuteDistance,commitCount,displayName,email\n";
     data.forEach((row) => {
-        var timeMS = row["timestamp"]["time"];
+        let timeMS = row["timestamp"]["time"];
         if(row["metric"]){
-            var users = row["metric"]["users"];
+            let users = row["metric"]["users"];
             users.forEach((user) => {
-                var averageMinuteDistance = user["averageMinuteDistance"] ? user["averageMinuteDistance"] : 0;
-                var commitCount = user["commitCount"] ? user["commitCount"]: 0;
-                var displayName = user["displayName"] ? user["displayName"]: 0;
-                var email = user["email"] ? user["email"]: 0;
+                let averageMinuteDistance = user["averageMinuteDistance"] ? user["averageMinuteDistance"] : 0;
+                let commitCount = user["commitCount"] ? user["commitCount"]: 0;
+                let displayName = user["displayName"] ? user["displayName"]: 0;
+                let email = user["email"] ? user["email"]: 0;
                 content += timeMS + "," + averageMinuteDistance + "," + commitCount + "," + displayName + "," + email + '\n';
             });
         }
@@ -138,13 +161,13 @@ function commit_distance(data){
 function commit_length(data){
     let content = "timeMS,avgCommitLength,displayName,email\n";
     data.forEach((row) => {
-        var timeMS = row["timestamp"]["time"];
+        let timeMS = row["timestamp"]["time"];
         if(row["metric"]){
-            var users = row["metric"]["users"];
+            let users = row["metric"]["users"];
             users.forEach((user) => {
-                var avgCommitLength = user["avgCommitLength"] ? user["avgCommitLength"]:0;
-                var displayName = user["displayName"] ? user["displayName"]:0;
-                var email = user["email"] ? user["email"]: 0;
+                let avgCommitLength = user["avgCommitLength"] ? user["avgCommitLength"]:0;
+                let displayName = user["displayName"] ? user["displayName"]:0;
+                let email = user["email"] ? user["email"]: 0;
                 content += timeMS + "," + avgCommitLength + "," + displayName + "," + email +'\n';
             });
         }
@@ -152,30 +175,148 @@ function commit_length(data){
     fs.writeFileSync(`commit_length_history.csv`, content);
 }
 
+/**
+ * Calculates the commit_size per timeMS and User and creates a csv called commit_size_history.csv
+ * @param data jsonData for metric_history commit_size
+ * */
 function commit_size(data){
-    console.log("comm_size");
+    let content = "timeMS,additionsAverage,additionsSum,deletionsAverage,deletionsSum,displayName,email,totalAverage,totalSum\n";
+    data.forEach((row) => {
+        let timeMS = row["timestamp"]["time"];
+        if(row["metric"]){
+            let users = row["metric"]["users"];
+            users.forEach((user) => {
+                let additionsAverage = user["additionsAverage"] ? user["additionsAverage"]:0;
+                let additionsSum= user["additionsSum"] ? user["additionsSum"]:0;
+                let deletionsAverage = user["deletionsAverage"] ? user["deletionsAverage"]: 0;
+                let deletionsSum = user["deletionsSum"] ? user["deletionsSum"]: 0;
+                let displayName = user["displayName"] ? user["displayName"]: 0;
+                let email = user["email"] ? user["email"]: 0;
+                let totalAverage = user["totalAverage"] ? user["totalAverage"]: 0;
+                let totalSum = user["totalSum"] ? user["totalSum"]: 0;
+                content += timeMS + "," + additionsAverage + "," + additionsSum + "," + deletionsAverage + ',' + deletionsSum +
+                    "," + displayName + ',' + email + ',' + totalAverage + ',' + totalSum +'\n';
+            });
+        }
+    });
+    fs.writeFileSync(`commit_size_history.csv`, content);
 }
 
+/**
+ * Calculates the communication_miscalculation_effort per timeMS  and creates a csv called communication_miscalculation_effort_history.csv
+ * @param data jsonData for metric_history communication_miscalculation_effort
+ * */
 function communication_miscalculation_effort(data){
-    console.log("communi_miscalcu");
+    let content = "timeMS,communicationTime,communicationTimeInPercent,deltaEstimate,initialEstimate,issueKey,newTotalEstimate\n";
+    data.forEach((row) => {
+        let timeMS = row["timestamp"]["time"];
+        if(row["metric"]){
+            let logs = row["metric"]["logs"];
+            logs.forEach((log) => {
+                let communicationTime = log["communicationTime"] ? log["communicationTime"]:0;
+                let communicationTimeInPercent = log["communicationTimeInPercent"] ? log["communicationTimeInPercent"]:0;
+                let deltaEstimate = log["deltaEstimate"] ? log["deltaEstimate"] : 0;
+                let initialEstimate = log["initialEstimate"] ? log["initialEstimate"] : 0;
+                let issueKey = log["issue"]["key"] ? log["issue"]["key"] : "";
+                let newTotalEstimate = log["newTotalEstimate"] ? log["newTotalEstimate"] : 0;
+                content += timeMS + "," + communicationTime + "," + communicationTimeInPercent + "," + deltaEstimate + "," +
+                    initialEstimate + "," + issueKey + "," + newTotalEstimate + '\n';
+            });
+        }
+    });
+    fs.writeFileSync(`communication_miscalculation_effort_history.csv`, content);
 }
 
 function correlation_jira_activity_push(data){
     console.log("corr_jira_act");
 }
 
+/**
+ * Calculates the night_weekend_work_time per timeMS and users and creates a csv called night_weekend_work_time_history.csv
+ * @param data jsonData for metric_history night_weekend_work_time
+ * */
 function night_weekend_work_time(data){
-    console.log("night_weekendWork");
+    let content = "timeMS,avgCommitLength,displayName,email\n";
+    data.forEach((row) => {
+        let timeMS = row["timestamp"]["time"];
+        if(row["metric"]){
+            let users = row["metric"]["users"];
+            users.forEach((user) => {
+                let allWorkTimeMillis = user["allWorkTimeMillis"] ? user["allWorkTimeMillis"] : 0 ;
+                let displayName = user["displayName"] ? user["displayName"]: 0;
+                let email = user["email"] ? user["email"]: 0;
+                let name = user["name"] ? user["name"]: 0;
+                let nightWorkTimeMillis = user["nightWorkTimeMillis"] ? user["nightWorkTimeMillis"]: 0;
+                let weekendWorkTimeMillis = user["weekendWorkTimeMillis"] ? user["weekendWorkTimeMillis"]: 0;
+                content += timeMS + "," + allWorkTimeMillis + "," + displayName + "," + email + ',' +
+                    name + ',' + nightWorkTimeMillis + ',' +  weekendWorkTimeMillis +  '\n';
+            });
+        }
+    });
+    fs.writeFileSync(`night_weekend_work_time_history.csv`, content);
 }
 
+/**
+ * Calculates the open_sprint_issues per timeMS and users and creates a csv called open_sprint_issues_history.csv
+ * @param data jsonData for metric_history open_sprint_issues
+ * */
 function open_sprint_issues(data){
-    console.log("opensprintissues");
+    let content = "timeMS,numIssues,estimatedTimeSum\n";
+    data.forEach((row) => {
+        let timeMS = row["timestamp"]["time"];
+        if(row["metric"]){
+            let openIssues = row["metric"]["openIssues"];
+            let numIssues = openIssues.length;
+            let estimatedTimeSum = 0;
+            openIssues.forEach((issue) => {
+                if(issue["estimatedTime"]){
+                    estimatedTimeSum += parseInt(issue["estimatedTime"]);
+                }
+            });
+            content += timeMS + "," + numIssues + "," + estimatedTimeSum + '\n';
+        }
+    });
+    fs.writeFileSync(`open_sprint_issues_history.csv`, content);
 }
 
+/**
+ * Calculates the story_point_complexity per timeMS and creates a csv called story_point_complexity_history.csv
+ * @param data jsonData for metric_history story_point_complexity
+ * */
 function story_point_complexity(data){
-    console.log("storypointcomplex");
+    let content = "timeMS,points,storyCount\n";
+    data.forEach((row) => {
+        let timeMS = row["timestamp"]["time"];
+        if(row["metric"]){
+            let story_storyPoints = row["metric"]["storyPoints"];
+            story_storyPoints.forEach((story) => {
+                let points = story["points"] ? story["points"]:0;
+                let storyCount = story["storyCount"] ? story["storyCount"]:0;
+                content += timeMS + "," + points + "," + storyCount + '\n';
+            });
+        }
+    });
+    fs.writeFileSync(`story_point_complexity_history.csv`, content);
 }
 
+/**
+ * Calculates the time_since_last_commit per timeMS and User and creates a csv called time_since_last_commit_history.csv
+ * @param data jsonData for metric_history time_since_last_commit
+ * */
 function time_since_last_commit(data) {
-    console.log("timesincelastcommit");
+    let content = "timeMS,displayName,email,timeSinceLastCommit,timeLastCommit\n";
+    data.forEach((row) => {
+        let timeMS = row["timestamp"]["time"];
+        if(row["metric"]){
+            let users = row["metric"]["users"];
+            users.forEach((user) => {
+                let displayName = user["displayName"] ? user["displayName"] : 0;
+                let email = user["email"] ? user["email"] : 0;
+                let timeSinceLastCommit = user["timeSinceLastCommit"] ? user["timeSinceLastCommit"] : 0;
+                let timeLastCommit = user["timestampLastCommit"]["time"] ? user["timestampLastCommit"]["time"] : 0;
+                content += timeMS + "," + displayName + "," + email + "," + timeSinceLastCommit + "," + timeLastCommit +'\n';
+            });
+        }
+    });
+    fs.writeFileSync(`time_since_last_commit_history.csv`, content);
 }
