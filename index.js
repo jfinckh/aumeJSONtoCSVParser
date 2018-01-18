@@ -78,16 +78,21 @@ try {
  * @param data jsonData for metric_history mood_history
  * */
 function moods_calc(data){
-    let content= "timeMS,mood,userId,value,timeSubmitted \n";
+    let content= "date,mood,userId,value,timeSubmitted \n";
     data.forEach((row) => {
         let timeMS = row["timestamp"]["time"];
+        let d = new Date(timeMS);
         let singleValues = row["teamMood"]["singleValues"];
         singleValues.forEach((singleValues_row) => {
             let mood= singleValues_row["mood"] ? singleValues_row["mood"] : "";
             let userId = singleValues_row["userId"] ? singleValues_row["userId"] : "";
             let value = singleValues_row["value"] ? singleValues_row["value"] : "";
             let timeSubmitted = singleValues_row["timestamp"]["time"] ? singleValues_row["timestamp"]["time"] : 0;
-            content += timeMS + "," + mood + "," + userId + "," + value + "," + timeSubmitted + '\n';
+            let dt = new Date(timeSubmitted);
+            content += d.getDay()+ '.' + (d.getMonth()+1) + '.' + d.getFullYear() + " " + d.getHours() +":" + d.getMinutes() +
+                ":" + d.getMilliseconds() + "," +
+                mood + "," + userId + "," + value + "," + dt.getDay()+"."+(dt.getMonth()+1) + "." + dt.getFullYear() +
+                " " + dt.getHours() +":" + dt.getMinutes() + ":" + dt.getMilliseconds()  + '\n';
         });
     });
     fs.writeFileSync(`moods_history.csv`, content);
@@ -98,9 +103,10 @@ function moods_calc(data){
  * @param data jsonData for metric_history assigned_tasks
  * */
 function assigned_tasks(data){
-    let content = "timeMS,displayName,email,name,numIssues\n";
+    let content = "date,displayName,email,name,numIssues\n";
     data.forEach((row) => {
         let timeMS = row["timestamp"]["time"];
+        let d = new Date(timeMS);
         if(row["metric"]){
             let users = row["metric"]["users"];
             users.forEach((user) => {
@@ -108,7 +114,9 @@ function assigned_tasks(data){
                 if(user["issues"]) {
                     issuesNum = user["issues"].length;
                 }
-                content += timeMS + "," + user["displayName"] + "," + user["email"] + "," + user["name"] + "," + issuesNum + '\n';
+                content += d.getDay()+ '.' + (d.getMonth()+1) + '.' + d.getFullYear()+ " " + d.getHours() +":" + d.getMinutes() +
+                    ":" + d.getMilliseconds() + "," +
+                    user["displayName"] + "," + user["email"] + "," + user["name"] + "," + issuesNum + '\n';
             });
         }
     });
@@ -120,14 +128,18 @@ function assigned_tasks(data){
  * @param data jsonData for metric_history average_time_comment
  * */
 function average_time_comment(data){
-    let content = "timeMS,averageResponseTime,numberOfAnsweredQuestions,numberOfNotAnsweredQuestions,numberOfQuestions\n";
+    let content = "date,averageResponseTime,numberOfAnsweredQuestions,numberOfNotAnsweredQuestions,numberOfQuestions\n";
     data.forEach((row) => {
         let timeMS = row["timestamp"]["time"];
+        let d = new Date(timeMS);
         let averageResponseTime = row["metric"]["averageResponseTime"] ? row["metric"]["averageResponseTime"] : 0;
         let numberOfAnsweredQuestions = row["metric"]["numberOfAnsweredQuestions"] ? row["metric"]["numberOfAnsweredQuestions"] : 0;
         let numberOfNotAnsweredQuestions = row["metric"]["numberOfNotAnsweredQuestions"] ?  row["metric"]["numberOfNotAnsweredQuestions"] : 0;
         let numberOfQuestions = row["metric"]["numberOfQuestions"]? row["metric"]["numberOfQuestions"] : 0;
-        content += timeMS + "," + averageResponseTime + "," + numberOfAnsweredQuestions + "," + numberOfNotAnsweredQuestions + "," + numberOfQuestions + '\n';
+        content += d.getDay()+ '.' + (d.getMonth()+1) + '.' + d.getFullYear()+ " " + d.getHours() +":" + d.getMinutes() +
+            ":" + d.getMilliseconds() + "," +
+            averageResponseTime + "," + numberOfAnsweredQuestions + "," + numberOfNotAnsweredQuestions + "," +
+            numberOfQuestions + '\n';
     });
     fs.writeFileSync(`average_time_comment_history.csv`, content);
 }
@@ -137,9 +149,10 @@ function average_time_comment(data){
  * @param data jsonData for metric_history commit_distance
  * */
 function commit_distance(data){
-    let content = "timeMS,averageMinuteDistance,commitCount,displayName,email\n";
+    let content = "date,averageMinuteDistance,commitCount,displayName,email\n";
     data.forEach((row) => {
         let timeMS = row["timestamp"]["time"];
+        let d = new Date(timeMS);
         if(row["metric"]){
             let users = row["metric"]["users"];
             users.forEach((user) => {
@@ -147,7 +160,9 @@ function commit_distance(data){
                 let commitCount = user["commitCount"] ? user["commitCount"]: 0;
                 let displayName = user["displayName"] ? user["displayName"]: 0;
                 let email = user["email"] ? user["email"]: 0;
-                content += timeMS + "," + averageMinuteDistance + "," + commitCount + "," + displayName + "," + email + '\n';
+                content += d.getDay()+ '.' + (d.getMonth()+1) + '.' + d.getFullYear()+ " " + d.getHours() +":" + d.getMinutes() +
+                    ":" + d.getMilliseconds() + "," +
+                    averageMinuteDistance + "," + commitCount + "," + displayName + "," + email + '\n';
             });
         }
     });
@@ -159,16 +174,19 @@ function commit_distance(data){
  * @param data jsonData for metric_history commit_length
  * */
 function commit_length(data){
-    let content = "timeMS,avgCommitLength,displayName,email\n";
+    let content = "date,avgCommitLength,displayName,email\n";
     data.forEach((row) => {
         let timeMS = row["timestamp"]["time"];
+        let d = new Date(timeMS);
         if(row["metric"]){
             let users = row["metric"]["users"];
             users.forEach((user) => {
                 let avgCommitLength = user["avgCommitLength"] ? user["avgCommitLength"]:0;
                 let displayName = user["displayName"] ? user["displayName"]:0;
                 let email = user["email"] ? user["email"]: 0;
-                content += timeMS + "," + avgCommitLength + "," + displayName + "," + email +'\n';
+                content += d.getDay()+ '.' + (d.getMonth()+1) + '.' + d.getFullYear()+ " " + d.getHours() +":" + d.getMinutes() +
+                    ":" + d.getMilliseconds() + "," +
+                    avgCommitLength + "," + displayName + "," + email +'\n';
             });
         }
     });
@@ -180,9 +198,10 @@ function commit_length(data){
  * @param data jsonData for metric_history commit_size
  * */
 function commit_size(data){
-    let content = "timeMS,additionsAverage,additionsSum,deletionsAverage,deletionsSum,displayName,email,totalAverage,totalSum\n";
+    let content = "date,additionsAverage,additionsSum,deletionsAverage,deletionsSum,displayName,email,totalAverage,totalSum\n";
     data.forEach((row) => {
         let timeMS = row["timestamp"]["time"];
+        let d = new Date(timeMS);
         if(row["metric"]){
             let users = row["metric"]["users"];
             users.forEach((user) => {
@@ -194,7 +213,9 @@ function commit_size(data){
                 let email = user["email"] ? user["email"]: 0;
                 let totalAverage = user["totalAverage"] ? user["totalAverage"]: 0;
                 let totalSum = user["totalSum"] ? user["totalSum"]: 0;
-                content += timeMS + "," + additionsAverage + "," + additionsSum + "," + deletionsAverage + ',' + deletionsSum +
+                content += d.getDay()+ '.' + (d.getMonth()+1) + '.' + d.getFullYear()+ " " + d.getHours() +":" + d.getMinutes() +
+                    ":" + d.getMilliseconds() + "," +
+                    additionsAverage + "," + additionsSum + "," + deletionsAverage + ',' + deletionsSum +
                     "," + displayName + ',' + email + ',' + totalAverage + ',' + totalSum +'\n';
             });
         }
@@ -207,9 +228,10 @@ function commit_size(data){
  * @param data jsonData for metric_history communication_miscalculation_effort
  * */
 function communication_miscalculation_effort(data){
-    let content = "timeMS,communicationTime,communicationTimeInPercent,deltaEstimate,initialEstimate,issueKey,newTotalEstimate\n";
+    let content = "date,communicationTime,communicationTimeInPercent,deltaEstimate,initialEstimate,issueKey,newTotalEstimate\n";
     data.forEach((row) => {
         let timeMS = row["timestamp"]["time"];
+        let d = new Date(timeMS);
         if(row["metric"]){
             let logs = row["metric"]["logs"];
             logs.forEach((log) => {
@@ -219,7 +241,9 @@ function communication_miscalculation_effort(data){
                 let initialEstimate = log["initialEstimate"] ? log["initialEstimate"] : 0;
                 let issueKey = log["issue"]["key"] ? log["issue"]["key"] : "";
                 let newTotalEstimate = log["newTotalEstimate"] ? log["newTotalEstimate"] : 0;
-                content += timeMS + "," + communicationTime + "," + communicationTimeInPercent + "," + deltaEstimate + "," +
+                content += d.getDay()+ '.' + (d.getMonth()+1) + '.' + d.getFullYear()+ " " + d.getHours() +":" + d.getMinutes() +
+                    ":" + d.getMilliseconds() + "," +
+                    communicationTime + "," + communicationTimeInPercent + "," + deltaEstimate + "," +
                     initialEstimate + "," + issueKey + "," + newTotalEstimate + '\n';
             });
         }
@@ -232,10 +256,12 @@ function communication_miscalculation_effort(data){
  * @param data jsonData for metric_history correlation_jira_activity_push
  * */
 function correlation_jira_activity_push(data){
-    let content = "timeMS,lastUpdated,contentActivity,id,title,publishedTime\n";
+    let content = "date,lastUpdated,contentActivity,id,title,publishedTime\n";
     data.forEach((row) => {
         let timeMS = row["timestamp"]["time"];
+        let d = new Date(timeMS);
         let lastUpdated = row["metric"]["lastUpdated"]["time"] ? row["metric"]["lastUpdated"]["time"]: "0";
+        let dl = new Date(lastUpdated);
         if(row["metric"]){
             let activities = row["metric"]["activities"];
             if(activities){
@@ -244,7 +270,11 @@ function correlation_jira_activity_push(data){
                     let id = activity["id"] ? activity["id"]: "";
                     let title = activity["title"] ? activity["title"] : "";
                     let publishedTime = activity["published"]["time"] ? activity["published"]["time"] : 0;
-                    content += timeMS + "," + lastUpdated + "," + contentActivity + "," + id + "," + title + "," + publishedTime + '\n';
+                    content += d.getDay()+ '.' + (d.getMonth()+1) + '.' + d.getFullYear()+ " " + d.getHours() +":" + d.getMinutes() +
+                        ":" + d.getMilliseconds() + "," +
+                        dl.getDay()+"."+(dl.getMonth()+1)+"."+dl.getFullYear()+ " " + dl.getHours() +":" + dl.getMinutes() +
+                        ":" + dl.getMilliseconds() +
+                        "," + contentActivity + "," + id + "," + title + "," + publishedTime + '\n';
                 }));
             }
         }
@@ -257,9 +287,10 @@ function correlation_jira_activity_push(data){
  * @param data jsonData for metric_history night_weekend_work_time
  * */
 function night_weekend_work_time(data){
-    let content = "timeMS,avgCommitLength,displayName,email\n";
+    let content = "date,avgCommitLength,displayName,email\n";
     data.forEach((row) => {
         let timeMS = row["timestamp"]["time"];
+        let d = new Date(timeMS);
         if(row["metric"]){
             let users = row["metric"]["users"];
             users.forEach((user) => {
@@ -269,7 +300,9 @@ function night_weekend_work_time(data){
                 let name = user["name"] ? user["name"]: 0;
                 let nightWorkTimeMillis = user["nightWorkTimeMillis"] ? user["nightWorkTimeMillis"]: 0;
                 let weekendWorkTimeMillis = user["weekendWorkTimeMillis"] ? user["weekendWorkTimeMillis"]: 0;
-                content += timeMS + "," + allWorkTimeMillis + "," + displayName + "," + email + ',' +
+                content += d.getDay()+ '.' + (d.getMonth()+1) + '.' + d.getFullYear()+ " " + d.getHours() +":" + d.getMinutes() +
+                    ":" + d.getMilliseconds() + "," +
+                    allWorkTimeMillis + "," + displayName + "," + email + ',' +
                     name + ',' + nightWorkTimeMillis + ',' +  weekendWorkTimeMillis +  '\n';
             });
         }
@@ -282,9 +315,10 @@ function night_weekend_work_time(data){
  * @param data jsonData for metric_history open_sprint_issues
  * */
 function open_sprint_issues(data){
-    let content = "timeMS,numIssues,estimatedTimeSum\n";
+    let content = "date,numIssues,estimatedTimeSum\n";
     data.forEach((row) => {
         let timeMS = row["timestamp"]["time"];
+        let d = new Date(timeMS);
         if(row["metric"]){
             let openIssues = row["metric"]["openIssues"];
             let numIssues = openIssues.length;
@@ -294,7 +328,8 @@ function open_sprint_issues(data){
                     estimatedTimeSum += parseInt(issue["estimatedTime"]);
                 }
             });
-            content += timeMS + "," + numIssues + "," + estimatedTimeSum + '\n';
+            content += d.getDay()+ '.' + (d.getMonth()+1) + '.' + d.getFullYear()+ " " + d.getHours() +":" + d.getMinutes() +
+                ":" + d.getMilliseconds() + "," + numIssues + "," + estimatedTimeSum + '\n';
         }
     });
     fs.writeFileSync(`open_sprint_issues_history.csv`, content);
@@ -305,15 +340,17 @@ function open_sprint_issues(data){
  * @param data jsonData for metric_history story_point_complexity
  * */
 function story_point_complexity(data){
-    let content = "timeMS,points,storyCount\n";
+    let content = "date,points,storyCount\n";
     data.forEach((row) => {
         let timeMS = row["timestamp"]["time"];
+        let d = new Date(timeMS);
         if(row["metric"]){
             let story_storyPoints = row["metric"]["storyPoints"];
             story_storyPoints.forEach((story) => {
                 let points = story["points"] ? story["points"]:0;
                 let storyCount = story["storyCount"] ? story["storyCount"]:0;
-                content += timeMS + "," + points + "," + storyCount + '\n';
+                content += d.getDay()+ '.' + (d.getMonth()+1) + '.' + d.getFullYear()+ " " + d.getHours() +":" + d.getMinutes() +
+                    ":" + d.getMilliseconds() + "," + points + "," + storyCount + '\n';
             });
         }
     });
@@ -325,9 +362,10 @@ function story_point_complexity(data){
  * @param data jsonData for metric_history time_since_last_commit
  * */
 function time_since_last_commit(data) {
-    let content = "timeMS,displayName,email,timeSinceLastCommit,timeLastCommit\n";
+    let content = "date,displayName,email,timeSinceLastCommit,timeLastCommit\n";
     data.forEach((row) => {
         let timeMS = row["timestamp"]["time"];
+        let d = new Date(timeMS);
         if(row["metric"]){
             let users = row["metric"]["users"];
             users.forEach((user) => {
@@ -335,7 +373,8 @@ function time_since_last_commit(data) {
                 let email = user["email"] ? user["email"] : 0;
                 let timeSinceLastCommit = user["timeSinceLastCommit"] ? user["timeSinceLastCommit"] : 0;
                 let timeLastCommit = user["timestampLastCommit"]["time"] ? user["timestampLastCommit"]["time"] : 0;
-                content += timeMS + "," + displayName + "," + email + "," + timeSinceLastCommit + "," + timeLastCommit +'\n';
+                content += d.getDay()+ '.' + (d.getMonth()+1) + '.' + d.getFullYear()+ " " + d.getHours() +":" + d.getMinutes() +
+                    ":" + d.getMilliseconds() + "," + displayName + "," + email + "," + timeSinceLastCommit + "," + timeLastCommit +'\n';
             });
         }
     });
