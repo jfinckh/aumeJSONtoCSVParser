@@ -26,7 +26,7 @@ try {
             _.keys(input[section]).forEach((subSection) => {
                 // depending on the subSection evaluate in a different way
                 switch(subSection){
-                   /* case "assigned_tasks":
+                    case "assigned_tasks":
                         assigned_tasks( _.values(input[section][subSection]) );
                         break;
                     case "average_time_comment":
@@ -43,11 +43,11 @@ try {
                         break;
                     case "communication_miscalculation_effort":
                         communication_miscalculation_effort( _.values(input[section][subSection]) );
-                        break;*/
+                        break;
                     case "correlation_jira_activity_push":
                         correlation_jira_activity_push( _.values(input[section][subSection]) );
                         break;
-                   /* case "night_weekend_work_time":
+                    case "night_weekend_work_time":
                         night_weekend_work_time( _.values(input[section][subSection]) );
                         break;
                     case "open_sprint_issues":
@@ -58,12 +58,12 @@ try {
                         break;
                     case "time_since_last_commit":
                         time_since_last_commit( _.values(input[section][subSection]) );
-                        break;*/
+                        break;
                 }
             });
 		} else if(section === "mood_history"){
             _.keys(input[section]).forEach(() => {
-                //moods_calc(_.values(input[section]));
+                moods_calc(_.values(input[section]));
             });
 
         }
